@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 import study.datajpa.entity.Team;
 
 @Repository
-public class TeamRepsitory {
+public class TeamJpaRepsitory {
 
 	@PersistenceContext
 	private EntityManager em;
