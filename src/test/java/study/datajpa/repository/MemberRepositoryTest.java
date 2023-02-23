@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,7 +70,6 @@ class MemberRepositoryTest {
 		long deletedCount = memberRepository.count();
 		assertThat(deletedCount).isEqualTo(0);
 	}
-
 
 	@Test
 	public void findByUsernameAndAgeGreaterThen() {
@@ -152,5 +152,46 @@ class MemberRepositoryTest {
 		for (Member member : result) {
 			System.out.println("member = " + member);
 		}
+	}
+
+	@Test
+	public void returnType() {
+		Member m1 = new Member("AAA", 10);
+		Member m2 = new Member("BBB", 20);
+		Member m3 = new Member("AAA", 30);
+		memberRepository.save(m1);
+		memberRepository.save(m2);
+		memberRepository.save(m3);
+
+		// 사용법
+		List<Member> result1 = memberRepository.findListByUsername("AAA");
+		System.out.println("result1 = " + result1);
+		// result1 = [Member(id=1, username=AAA, age=10), Member(id=3, username=AAA, age=30)]
+
+		Member result2 = memberRepository.findMemberByUsername("BBB");
+		System.out.println("result2 = " + result2);
+		// result2 = Member(id=2, username=BBB, age=20)
+
+		Optional<Member> reesult3 = memberRepository.findOptionalByUsername("BBB");
+		System.out.println("result3 = " + reesult3);
+		// result3 = Optional[Member(id=2, username=BBB, age=20)]
+
+		//주의 사항
+		List<Member> result4 = memberRepository.findListByUsername("CCC");
+		System.out.println("result4 = " + result4);
+		// result4 = []
+
+		Member result5 = memberRepository.findMemberByUsername("CCC");
+		System.out.println("result5 = " + result5);
+		// result5 = null
+
+		Optional<Member> reesult6 = memberRepository.findOptionalByUsername("CCC");
+		System.out.println("result6 = " + reesult6);
+		// result6 = Optional.empty
+
+		//예외 발생
+		// Member result7 = memberRepository.findMemberByUsername("AAA");
+		// Optional<Member> result8 = memberRepository.findOptionalByUsername("AAA");
+		// org.springframework.dao.IncorrectResultSizeDataAccessException: query did not return a unique result:
 	}
 }
