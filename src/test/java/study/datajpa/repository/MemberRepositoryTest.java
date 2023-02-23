@@ -6,6 +6,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,6 +32,8 @@ class MemberRepositoryTest {
 	MemberRepository memberRepository;
 	@Autowired
 	TeamRepository teamRepository;
+	@PersistenceContext
+	EntityManager em;
 
 	@Test
 	public void testMember() {
@@ -253,5 +258,37 @@ class MemberRepositoryTest {
 		// assertThat(page.getTotalPages()).isEqualTo(2);
 		assertThat(page.isFirst()).isTrue();
 		assertThat(page.hasNext()).isTrue();
+	}
+
+	@Test
+	public void bulkUpdate() {
+		//given
+		memberRepository.save(new Member("member1", 10));
+		memberRepository.save(new Member("member2", 19));
+		memberRepository.save(new Member("member3", 20));
+		memberRepository.save(new Member("member4", 21));
+		memberRepository.save(new Member("member5", 40));
+
+		//when
+		int resultCount = memberRepository.bulkAgePlus(20);
+
+		//then
+		assertThat(resultCount).isEqualTo(3);
+
+		// 주의사항
+		// @Modifying(clearAutomatically = true)를 안 했다고 가정한다!
+
+		// 벌크성 쿼리는 영속성 컨텍스트를 무시하고 DB에 바로 쿼리를 실행하기 때문에 영속성 컨텍스트와 DB의 정합성이 깨질 수 있다
+		Member member5 = memberRepository.findByUsername("member5").get(0);
+		System.out.println("member5 = " + member5);
+		// member5 = Member(id=5, username=member5, age=40)
+
+		// 벌크성 쿼리를 수행한 이후에는 꼭 영속성 컨텍스트를 초기화해야 한다
+		// @Modifying(clearAutomatically = true)을 하면 자동으로 벌크 연산 수행 후에 clear해준다
+		em.clear();
+
+		Member member5_2 = memberRepository.findByUsername("member5").get(0);
+		System.out.println("member5_2 = " + member5_2);
+		// member5_2 = Member(id=5, username=member5, age=41)
 	}
 }
