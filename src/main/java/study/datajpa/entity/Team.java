@@ -20,7 +20,7 @@ import lombok.ToString;
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString(of = {"id", "name"})
-public class Team {
+public class Team extends BaseEntity {
 
 	@Id
 	@GeneratedValue
